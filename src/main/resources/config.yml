@@ -1,0 +1,12 @@
+data_storage:
+  use_mysql: false
+
+  ip: 127.0.0.1
+  port: 3306
+  username: "root"
+  password: ""
+  useSSL: false
+  database: "spedupfurnaces"
+
+settings:
+  furnaces-worldwide: false # do you want every furnace in the world that you open / place to become a custom furnace?

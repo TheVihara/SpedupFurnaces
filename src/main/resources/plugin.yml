@@ -1,0 +1,8 @@
+name: SpedupFurnaces
+version: @version@
+main: me.gorenjec.spedupfurnaces.SpedupFurnaces
+api-version: 1.19
+authors: [ Vihara ]
+description: Adds the ability to make the furnaces faster with a leveling system.
+depend:
+  - "Vault"

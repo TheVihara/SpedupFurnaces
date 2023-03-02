@@ -1,0 +1,46 @@
+furnaces:
+  furnace:
+    max_level: 3
+    max_speed: 20
+    speed: # how fast the furnace will smelt resources at certain levels
+      1: 200
+      2: 100
+      3: 20
+    prices: # how much the level upgrades cost
+      1:
+        exp: 30
+        money: 50
+      2:
+        money: 100
+      3:
+        exp: 30
+  blast_furnace:
+    max_level: 3
+    max_speed: 20
+    speed: # how fast the furnace will smelt resources at certain levels
+      1: 200
+      2: 100
+      3: 20
+    prices:
+      1:
+        exp: 30
+        money: 50
+      2:
+        money: 100
+      3:
+        exp: 30
+  smoker:
+    max_level: 3
+    max_speed: 20
+    speed: # how fast the furnace will smelt resources at certain levels
+      1: 200
+      2: 100
+      3: 20
+    prices: # how much the level upgrades cost
+      1:
+        exp: 30
+        money: 50
+      2:
+        money: 100
+      3:
+        exp: 30

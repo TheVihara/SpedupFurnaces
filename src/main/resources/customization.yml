@@ -1,0 +1,30 @@
+items:
+  furnace:
+    name: "Furnace"
+    lore:
+      - "&8&m-------------"
+      - "&fLevel:&d %level%"
+      - "&8&m-------------"
+
+gui:
+  preview:
+    furnace_name: ""
+    furnace_lore:
+      - "&8&m-------------"
+      - "&fLevel:&d %level%"
+      - "&fDuration:&d %duration%s"
+      - "&8&m-------------"
+  upgrade:
+    name: "&d%level%&8 ➡&d&l %next_level%"
+    lore:
+      - "&8&m-------------"
+      - "&fDuration:&d %duration%s&8 ➡&d&l %duration_next%s"
+      - "&8&m-------------"
+      - "&fCost:&2 $%money%&f,&b %exp%exp"
+
+messages:
+  bought-message: "&aBought!"
+  not-enough-money: "&cNot enough money!"
+  not-enough-exp: "&cNot enough exp!"
+  not-enough-money-and-exp: "&cNot enough money and exp."
+  max-level: "&cThis furnace is already maxed out!"
