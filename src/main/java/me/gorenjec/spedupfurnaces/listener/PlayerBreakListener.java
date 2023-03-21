@@ -5,12 +5,14 @@ import me.gorenjec.spedupfurnaces.data.FurnacesFile;
 import me.gorenjec.spedupfurnaces.models.CustomFurnace;
 import me.gorenjec.spedupfurnaces.utils.HexUtils;
 import me.gorenjec.spedupfurnaces.utils.NBTUtil;
+import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
@@ -31,6 +33,15 @@ public class PlayerBreakListener implements Listener {
     @EventHandler
     public void onBreak(BlockBreakEvent e) {
         Block block = e.getBlock();
+        if (cache.getInstance().hasGriefPrevention()) {
+            String noBuildReason = GriefPrevention.instance.allowBreak(e.getPlayer(), block, block.getLocation(), e);
+
+            if (noBuildReason != null) {
+                e.setCancelled(true);
+                return;
+            }
+        }
+
         CustomFurnace customFurnace = cache.getFurnace(block.getLocation());
         if (customFurnace == null) {
             if (cache.getInstance().getConfig().getBoolean("settings.furnaces-worldwide")) {

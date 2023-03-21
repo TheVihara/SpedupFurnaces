@@ -33,7 +33,7 @@ public class SQLStorage {
         HikariConfig hikariConfig = new HikariConfig();
 
         if (useMySQL) {
-            hikariConfig.setDriverClassName("com.mysql.jdbc.jdbc2.optional.MysqlDataSource");
+            hikariConfig.setDriverClassName("com.mysql.cj.jdbc.Driver");
             hikariConfig.setUsername(config.getString("data_storage.username"));
             hikariConfig.setPassword(config.getString("data_storage.password"));
             String hostname = config.getString("data_storage.ip");
@@ -63,12 +63,12 @@ public class SQLStorage {
         try (Connection connection = dataSource.getConnection()) {
             String createTableSql = "CREATE TABLE IF NOT EXISTS " + PLAYERDATA_TABLE + "("
                     + "id INTEGER PRIMARY KEY " + autoInc + ","
-                    + "type INT, "
+                    + "type TEXT, "
                     + "level INT, "
                     + "loc_x INT, "
                     + "loc_y INT, "
                     + "loc_z INT, "
-                    + "loc_world INT"
+                    + "loc_world TEXT"
                     + ")";
             PreparedStatement statement = connection.prepareStatement(createTableSql);
             statement.execute();
@@ -91,17 +91,27 @@ public class SQLStorage {
      */
 
     public void addFurnace(CustomFurnace customFurnace) {
-        String sql = "INSERT INTO " + PLAYERDATA_TABLE + " VALUES (?, ?, ?, ?, ?, ?, ?)";
+        boolean mysql = instance.getConfig().getBoolean("data_storage.use_mysql");
+        String sql = mysql ? "INSERT INTO " + PLAYERDATA_TABLE + " (type, level, loc_x, loc_y, loc_z, loc_world) VALUES (?, ?, ?, ?, ?, ?)" : "INSERT INTO " + PLAYERDATA_TABLE + " VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(sql);
 
-            statement.setString(2, customFurnace.getMaterial().name());
-            statement.setInt(3, customFurnace.getLevel());
-            statement.setInt(4, customFurnace.getLocation().getBlockX());
-            statement.setInt(5, customFurnace.getLocation().getBlockY());
-            statement.setInt(6, customFurnace.getLocation().getBlockZ());
-            statement.setString(7, customFurnace.getLocation().getWorld().getName());
+            if (mysql) {
+                statement.setString(1, customFurnace.getMaterial().name());
+                statement.setInt(2, customFurnace.getLevel());
+                statement.setInt(3, customFurnace.getLocation().getBlockX());
+                statement.setInt(4, customFurnace.getLocation().getBlockY());
+                statement.setInt(5, customFurnace.getLocation().getBlockZ());
+                statement.setString(6, customFurnace.getLocation().getWorld().getName());
+            } else {
+                statement.setString(2, customFurnace.getMaterial().name());
+                statement.setInt(3, customFurnace.getLevel());
+                statement.setInt(4, customFurnace.getLocation().getBlockX());
+                statement.setInt(5, customFurnace.getLocation().getBlockY());
+                statement.setInt(6, customFurnace.getLocation().getBlockZ());
+                statement.setString(7, customFurnace.getLocation().getWorld().getName());
+            }
 
             statement.execute();
         } catch (SQLException e) {

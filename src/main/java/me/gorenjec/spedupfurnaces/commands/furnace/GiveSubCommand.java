@@ -3,6 +3,9 @@ package me.gorenjec.spedupfurnaces.commands.furnace;
 import cloud.commandframework.Command;
 import cloud.commandframework.arguments.standard.IntegerArgument;
 import cloud.commandframework.arguments.standard.StringArgument;
+import cloud.commandframework.bukkit.arguments.selector.MultiplePlayerSelector;
+import cloud.commandframework.bukkit.parsers.PlayerArgument;
+import cloud.commandframework.bukkit.parsers.selector.MultiplePlayerSelectorArgument;
 import cloud.commandframework.bukkit.parsers.selector.SinglePlayerSelectorArgument;
 import cloud.commandframework.paper.PaperCommandManager;
 import me.gorenjec.spedupfurnaces.cache.InMemoryCache;
@@ -17,6 +20,9 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.Collection;
+import java.util.Collections;
 
 public class GiveSubCommand extends AstronaCommand {
     private final FurnacesFile furnacesFile;
@@ -36,10 +42,11 @@ public class GiveSubCommand extends AstronaCommand {
                 .argument(StringArgument.of("type"))
                 .argument(IntegerArgument.of("amount"))
                 .argument(IntegerArgument.optional("level"))
-                .argument(SinglePlayerSelectorArgument.optional("player"))
+                .argument(PlayerArgument.optional("player"))
                 .handler(commandContext -> {
                     Player player = (Player) commandContext.getSender();
                     Player target = commandContext.getOrDefault("player", player);
+
                     Material material = Material.valueOf(commandContext.get("type").toString().toUpperCase());
                     int amount = commandContext.get("amount");
                     int level = commandContext.getOrDefault("level", 1);

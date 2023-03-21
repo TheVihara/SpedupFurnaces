@@ -5,6 +5,18 @@ items:
       - "&8&m-------------"
       - "&fLevel:&d %level%"
       - "&8&m-------------"
+  blast_furnace:
+    name: "Blast Furnace"
+    lore:
+      - "&8&m-------------"
+      - "&fLevel:&d %level%"
+      - "&8&m-------------"
+  smoker:
+    name: "Smoker"
+    lore:
+      - "&8&m-------------"
+      - "&fLevel:&d %level%"
+      - "&8&m-------------"
 
 gui:
   preview:

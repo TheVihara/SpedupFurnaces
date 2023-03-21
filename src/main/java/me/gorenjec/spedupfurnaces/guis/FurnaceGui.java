@@ -44,7 +44,7 @@ public class FurnaceGui {
                         ItemStack furnaceItem = new ItemBuilder(customFurnace.getMaterial())
                                 .displayName(Objects.requireNonNull(getcConfig().getString("gui.preview.furnace_name"))
                                         .replaceAll("%level%", String.valueOf(customFurnace.getLevel()))
-                                        .replaceAll("%duration%", String.valueOf(getSpeed() / 20))
+                                        .replaceAll("%duration%", String.valueOf(((double) getSpeed() / 20)))
                                         .replaceAll("%next_level%", getNextLevel())
                                         .replaceAll("%duration_next%", getNextSpeed()), true)
                                 .lore(getFurnaceLore(), true)
@@ -53,7 +53,7 @@ public class FurnaceGui {
                         ItemStack upgradeItem = new ItemBuilder(Material.EMERALD)
                                 .displayName(Objects.requireNonNull(getcConfig().getString("gui.upgrade.name"))
                                         .replaceAll("%level%", String.valueOf(customFurnace.getLevel()))
-                                        .replaceAll("%duration%", String.valueOf(getSpeed() / 20))
+                                        .replaceAll("%duration%", String.valueOf(((double) getSpeed() / 20)))
                                         .replaceAll("%next_level%", getNextLevel())
                                         .replaceAll("%duration_next%", getNextSpeed()), true)
                                 .lore(getUpgradeLore(), true)
@@ -137,11 +137,11 @@ public class FurnaceGui {
                         return getfConfig().getInt("furnaces."
                                 + customFurnace.getMaterial().name().toLowerCase()
                                 + ".max_level") <= customFurnace.getLevel()
-                                ? "MAX" : String.valueOf(
+                                ? "MAX" : String.valueOf((double) (
                                 getfConfig().getInt("furnaces."
                                         + customFurnace.getMaterial().name().toLowerCase()
                                         + ".speed."
-                                        + Integer.parseInt(getNextLevel())) / 20
+                                        + Integer.parseInt(getNextLevel())) / 20)
                         );
                     }
 
@@ -149,7 +149,7 @@ public class FurnaceGui {
                         List<String> stringList = getcConfig().getStringList("gui.preview.furnace_lore");
                         stringList.replaceAll(str -> str
                                 .replaceAll("%level%", String.valueOf(customFurnace.getLevel()))
-                                .replaceAll("%duration%", String.valueOf(getSpeed() / 20))
+                                .replaceAll("%duration%", String.valueOf(((double) getSpeed() / 20)))
                                 .replaceAll("%next_level%", getNextLevel())
                                 .replaceAll("%duration_next%", getNextSpeed())
                                 .replaceAll("%money%", getNextMoneyCost())
@@ -161,7 +161,7 @@ public class FurnaceGui {
                         List<String> stringList = getcConfig().getStringList("gui.upgrade.lore");
                         stringList.replaceAll(str -> str
                                 .replaceAll("%level%", String.valueOf(customFurnace.getLevel()))
-                                .replaceAll("%duration%", String.valueOf(getSpeed() / 20))
+                                .replaceAll("%duration%", String.valueOf(((double) getSpeed() / 20)))
                                 .replaceAll("%next_level%", getNextLevel())
                                 .replaceAll("%duration_next%", getNextSpeed())
                                 .replaceAll("%money%", getNextMoneyCost())
@@ -178,7 +178,7 @@ public class FurnaceGui {
                         ItemStack furnaceItem = new ItemBuilder(customFurnace.getMaterial())
                                 .displayName(Objects.requireNonNull(getcConfig().getString("gui.preview.furnace_name"))
                                         .replaceAll("%level%", String.valueOf(customFurnace.getLevel()))
-                                        .replaceAll("%duration%", String.valueOf(getSpeed() / 20))
+                                        .replaceAll("%duration%", String.valueOf(((double) getSpeed() / 20)))
                                         .replaceAll("%next_level%", getNextLevel())
                                         .replaceAll("%duration_next%", getNextSpeed()), true)
                                 .lore(getFurnaceLore(), true)
@@ -187,7 +187,7 @@ public class FurnaceGui {
                         ItemStack upgradeItem = new ItemBuilder(Material.EMERALD)
                                 .displayName(Objects.requireNonNull(getcConfig().getString("gui.upgrade.name"))
                                         .replaceAll("%level%", String.valueOf(customFurnace.getLevel()))
-                                        .replaceAll("%duration%", String.valueOf(getSpeed() / 20))
+                                        .replaceAll("%duration%", String.valueOf(((double) getSpeed() / 20)))
                                         .replaceAll("%next_level%", getNextLevel())
                                         .replaceAll("%duration_next%", getNextSpeed()), true)
                                 .lore(getUpgradeLore(), true)

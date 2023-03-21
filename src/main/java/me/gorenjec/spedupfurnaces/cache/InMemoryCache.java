@@ -77,7 +77,9 @@ public class InMemoryCache {
                     .replaceAll("%duration%", String.valueOf(speed / 20)));
         });
 
-        itemMeta.setDisplayName(HexUtils.colorify(fileConfig.getString("items." + customFurnace.getMaterial().name().toLowerCase() + ".name")));
+        itemMeta.setDisplayName(HexUtils.colorify(fileConfig.getString("items." + customFurnace.getMaterial().name().toLowerCase() + ".name")
+                .replaceAll("%level%", String.valueOf(customFurnace.getLevel()))
+                .replaceAll("%duration%", String.valueOf(speed / 20))));
         itemMeta.setLore(newLore);
         itemMeta = nbtUtil.setInt(itemMeta, customFurnace.getLevel(), "furnace-level");
         item.setItemMeta(itemMeta);
@@ -108,6 +110,9 @@ public class InMemoryCache {
                     .replaceAll("%duration%", String.valueOf(speed / 20)));
         });
 
+        itemMeta.setDisplayName(HexUtils.colorify(fileConfig.getString("items." + material.name().toLowerCase() + ".name"))
+                .replaceAll("%level%", String.valueOf(level))
+                .replaceAll("%duration%", String.valueOf(speed / 20)));
         itemMeta.setLore(newLore);
         itemMeta = nbtUtil.setInt(itemMeta, level, "furnace-level");
         item.setItemMeta(itemMeta);

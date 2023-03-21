@@ -29,6 +29,7 @@ public final class SpedupFurnaces extends JavaPlugin {
     private SQLStorage storage;
     private InventoryManager manager;
     private static Economy econ = null;
+    private boolean griefPrevention;
 
     @Override
     public void onEnable() {
@@ -40,6 +41,7 @@ public final class SpedupFurnaces extends JavaPlugin {
             return;
         }
 
+        this.griefPrevention = setupGriefPrevention();
         this.storage = new SQLStorage(this);
         this.furnacesFile = new FurnacesFile(this);
         this.customizationFile = new CustomizationFile(this);
@@ -78,6 +80,10 @@ public final class SpedupFurnaces extends JavaPlugin {
         pM.registerEvents(new PlayerInteractListener(furnacesFile, cache), this);
     }
 
+    public boolean setupGriefPrevention() {
+        return getServer().getPluginManager().getPlugin("GriefPrevention") != null;
+    }
+
     public void registerCommands() {
         CommandHandler.register(
                 new SpedupFurnaceCommand(),
@@ -85,6 +91,10 @@ public final class SpedupFurnaces extends JavaPlugin {
                 new GiveSubCommand(furnacesFile, cache, nbtUtil),
                 new ReloadSubCommand(furnacesFile, customizationFile, cache)
         );
+    }
+
+    public boolean hasGriefPrevention() {
+        return griefPrevention;
     }
 
     public CustomizationFile getCustomizationFile() {

@@ -6,6 +6,7 @@ import me.gorenjec.spedupfurnaces.data.CustomizationFile;
 import me.gorenjec.spedupfurnaces.data.FurnacesFile;
 import me.gorenjec.spedupfurnaces.models.CustomFurnace;
 import me.gorenjec.spedupfurnaces.utils.NBTUtil;
+import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
@@ -37,8 +38,16 @@ public class PlayerInteractListener implements Listener {
         Block block = e.getClickedBlock();
 
         // Check for null block and return early
-        if (block == null || !player.isSneaking() || Objects.requireNonNull(e.getHand()) != EquipmentSlot.HAND || e.getAction() != Action.LEFT_CLICK_BLOCK) {
+        if (block == null || !player.isSneaking() || e.getHand() == null || e.getHand() != EquipmentSlot.HAND || e.getAction() != Action.LEFT_CLICK_BLOCK) {
             return;
+        }
+
+        if (instance.hasGriefPrevention()) {
+            String noBuildReason = GriefPrevention.instance.allowBuild(player, block.getLocation());
+            if (noBuildReason != null) {
+                e.setCancelled(true);
+                return;
+            }
         }
 
         Location loc = block.getLocation();

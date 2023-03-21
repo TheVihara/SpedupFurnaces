@@ -45,10 +45,13 @@ public class CommandHandler {
                 .withArgumentParsingHandler()
                 .withNoPermissionHandler()
                 .withHandler(MinecraftExceptionHandler.ExceptionType.COMMAND_EXECUTION,
-                        (commandSender, e) -> Component.text()
+                        (commandSender, e) -> {
+                    e.printStackTrace();
+                    return Component.text()
                                 .content("An internal error occurred while attempting to perform this command.")
                                 .color(NamedTextColor.RED)
-                                .build())
+                                .build();
+                        })
 
                 .withHandler(MinecraftExceptionHandler.ExceptionType.INVALID_SYNTAX,
                         (commandSender, e) -> Component.text()

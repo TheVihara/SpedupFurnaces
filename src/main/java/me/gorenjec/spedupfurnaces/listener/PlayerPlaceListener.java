@@ -4,6 +4,7 @@ import me.gorenjec.spedupfurnaces.cache.InMemoryCache;
 import me.gorenjec.spedupfurnaces.data.FurnacesFile;
 import me.gorenjec.spedupfurnaces.models.CustomFurnace;
 import me.gorenjec.spedupfurnaces.utils.NBTUtil;
+import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -26,6 +27,15 @@ public class PlayerPlaceListener implements Listener {
     @EventHandler
     public void onPlace(BlockPlaceEvent e) {
         Block block = e.getBlockPlaced();
+        if (cache.getInstance().hasGriefPrevention()) {
+            String noBuildReason = GriefPrevention.instance.allowBuild(e.getPlayer(), block.getLocation());
+
+            if (noBuildReason != null) {
+                e.setCancelled(true);
+                return;
+            }
+        }
+
         FileConfiguration furnacesConfig = furnacesFile.getConfig();
         ConfigurationSection furnacesSection = furnacesConfig.getConfigurationSection("furnaces");
 

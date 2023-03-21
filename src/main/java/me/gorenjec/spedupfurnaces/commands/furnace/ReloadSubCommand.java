@@ -28,12 +28,11 @@ public class ReloadSubCommand extends AstronaCommand {
                 .literal("reload")
                 .permission("spedupfurnaces.use.reload")
                 .handler(commandContext -> {
-                    Player player = (Player) commandContext.getSender();
                     SpedupFurnaces instance = cache.getInstance();
                     instance.reloadConfig();
                     furnacesFile.cache();
                     customizationFile.cache();
-                    player.sendMessage(HexUtils.colorify("&aReloaded configuration."));
+                    commandContext.getSender().sendMessage(HexUtils.colorify("&aReloaded configuration."));
                 }).build();
     }
 }

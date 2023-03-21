@@ -4,5 +4,7 @@ main: me.gorenjec.spedupfurnaces.SpedupFurnaces
 api-version: 1.19
 authors: [ Vihara ]
 description: Adds the ability to make the furnaces faster with a leveling system.
+softdepend:
+  - "GriefPrevention"
 depend:
   - "Vault"
