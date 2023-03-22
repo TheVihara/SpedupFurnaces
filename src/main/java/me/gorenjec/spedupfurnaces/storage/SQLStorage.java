@@ -120,6 +120,42 @@ public class SQLStorage {
         }
     }
 
+    public void updateFurnace(CustomFurnace customFurnace) {
+        String sql = "UPDATE " + PLAYERDATA_TABLE + " SET level = ? WHERE loc_x = ? AND loc_y = ? AND loc_z = ? AND loc_world = ?;";
+
+        try (Connection connection = dataSource.getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(sql);
+            Location location = customFurnace.getLocation();
+            statement.setInt(1, customFurnace.getLevel());
+            statement.setInt(2, location.getBlockX());
+            statement.setInt(3, location.getBlockY());
+            statement.setInt(4, location.getBlockZ());
+            statement.setString(5, location.getWorld().getName());
+
+            statement.execute();
+        } catch (SQLException e) {
+            instance.getLogger().severe("Could not store furnace!");
+            e.printStackTrace();
+        }
+    }
+
+    public void removeFurnace(Location location) {
+        String sql = "DELETE FROM " + PLAYERDATA_TABLE + " WHERE loc_x = ? AND loc_y = ? AND loc_z = ? AND loc_world = ?;";
+
+        try (Connection connection = dataSource.getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setInt(1, location.getBlockX());
+            statement.setInt(2, location.getBlockY());
+            statement.setInt(3, location.getBlockZ());
+            statement.setString(4, location.getWorld().getName());
+
+            statement.execute();
+        } catch (SQLException e) {
+            instance.getLogger().severe("Could not remove furnace!");
+            e.printStackTrace();
+        }
+    }
+
     public Map<Location, CustomFurnace> getFurnaces() {
         String sql = "SELECT * FROM " + PLAYERDATA_TABLE;
         Map<Location, CustomFurnace> customFurnaceMap = new HashMap<>();

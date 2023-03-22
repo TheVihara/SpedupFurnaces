@@ -8,11 +8,13 @@ import me.gorenjec.spedupfurnaces.models.CustomFurnace;
 import me.gorenjec.spedupfurnaces.storage.SQLStorage;
 import me.gorenjec.spedupfurnaces.utils.HexUtils;
 import me.gorenjec.spedupfurnaces.utils.NBTUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,28 +25,52 @@ public class InMemoryCache {
     private SpedupFurnaces instance;
     private final CustomizationFile customizationFile;
     private Map<Location, CustomFurnace> furnaceMap = new HashMap<>();
+    private Map<Location, CustomFurnace> updatedFurnaceMap = new HashMap<>();
+    private Map<Location, CustomFurnace> addedFurnaceMap = new HashMap<>();
+    private Map<Location, CustomFurnace> removedFurnaceMap = new HashMap<>();
     private Map<CustomFurnace, RyseInventory> furnaceGuiMap = new HashMap<>();
 
     public InMemoryCache(SpedupFurnaces instance, CustomizationFile customizationFile) {
         this.instance = instance;
         this.customizationFile = customizationFile;
         this.cacheInitialData();
+        this.startTimedFlushing();
     }
 
     public void flush() {
         SQLStorage storage = instance.getStorage();
-        storage.clearFurnaces();
-        furnaceMap.forEach((location, customFurnace) -> {
-            storage.addFurnace(customFurnace);
+
+        updatedFurnaceMap.forEach((location, customFurnace) -> {
+            storage.updateFurnace(customFurnace);
         });
+        addedFurnaceMap.forEach((location, customFurnace) -> {
+            storage.addFurnace(customFurnace);
+            updatedFurnaceMap.put(location, customFurnace);
+        });
+        removedFurnaceMap.forEach((location, customFurnace) -> {
+            storage.removeFurnace(location);
+        });
+
+        addedFurnaceMap.clear();
+        removedFurnaceMap.clear();
+    }
+
+    private void startTimedFlushing() {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                flush();
+            }
+        }.runTaskTimerAsynchronously(instance, 0L, 1200L);
     }
 
     private void cacheInitialData() {
         furnaceMap = instance.getStorage().getFurnaces();
+        updatedFurnaceMap = furnaceMap;
     }
 
     public void cacheFurnace(CustomFurnace customFurnace) {
-        this.furnaceMap.put(customFurnace.getLocation(), customFurnace);
+        addFurnace(customFurnace.getLocation(), customFurnace);
     }
 
     public void addGui(CustomFurnace customFurnace) {
@@ -87,8 +113,16 @@ public class InMemoryCache {
         return item;
     }
 
+    public void addFurnace(Location location, CustomFurnace customFurnace) {
+        furnaceMap.put(location, customFurnace);
+        addedFurnaceMap.put(location, customFurnace);
+    }
+
     public void removeFurnace(Location location) {
         furnaceGuiMap.remove(furnaceMap.get(location));
+        updatedFurnaceMap.remove(location);
+        removedFurnaceMap.put(location, furnaceMap.get(location));
+        addedFurnaceMap.remove(location);
         furnaceMap.remove(location);
     }
 
