@@ -5,13 +5,23 @@ import me.gorenjec.spedupfurnaces.data.FurnacesFile;
 import me.gorenjec.spedupfurnaces.models.CustomFurnace;
 import me.gorenjec.spedupfurnaces.utils.NBTUtil;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
+import net.minecraft.world.entity.Display;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Directional;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.Vector;
+
+import java.util.UUID;
 
 public class PlayerPlaceListener implements Listener {
     private final FurnacesFile furnacesFile;
@@ -27,6 +37,7 @@ public class PlayerPlaceListener implements Listener {
     @EventHandler
     public void onPlace(BlockPlaceEvent e) {
         Block block = e.getBlockPlaced();
+        World world = e.getBlock().getWorld();
         if (cache.getInstance().hasGriefPrevention()) {
             String noBuildReason = GriefPrevention.instance.allowBuild(e.getPlayer(), block.getLocation());
 
@@ -59,5 +70,51 @@ public class PlayerPlaceListener implements Listener {
         CustomFurnace customFurnace = new CustomFurnace(block.getLocation(), block.getType(), level);
         cache.cacheFurnace(customFurnace);
         cache.addGui(customFurnace);
+
+        spawnEntity(customFurnace, e.getPlayer());
+    }
+
+    public void spawnEntity(CustomFurnace customFurnace, Player player) {
+        Block block = customFurnace.getLocation().getBlock();
+        Location location = block.getLocation().clone();
+        BlockData blockData = block.getBlockData();
+        BlockFace blockFace = ((Directional) blockData).getFacing();
+        Vector direction = blockFace.getDirection();
+        int level = customFurnace.getLevel();
+        float yaw = 0;
+
+        switch (blockFace) {
+            case NORTH -> {
+                yaw = 180;
+                direction.multiply(0.51);
+            }
+            case EAST -> {
+                yaw = -90;
+                direction.multiply(0.5);
+            }
+            case SOUTH -> {
+                yaw = 0;
+                direction.multiply(0.5);
+            }
+            case WEST -> {
+                yaw = 90;
+                direction.multiply(0.51);
+            }
+        }
+
+        location.add(0.5, 0.3, 0.5);
+        location.add(direction);
+
+        cache.getInstance().getDisplayPacket().spawnTextEntity(
+                player,
+                100,
+                UUID.randomUUID(),
+                location,
+                "§bLevel " + level,
+                1.0f,
+                yaw,
+                0,
+                Display.BillboardConstraints.FIXED
+        );
     }
 }

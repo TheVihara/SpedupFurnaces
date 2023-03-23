@@ -13,9 +13,11 @@ import me.gorenjec.spedupfurnaces.listener.FurnaceStartSmeltListener;
 import me.gorenjec.spedupfurnaces.listener.PlayerBreakListener;
 import me.gorenjec.spedupfurnaces.listener.PlayerInteractListener;
 import me.gorenjec.spedupfurnaces.listener.PlayerPlaceListener;
+import me.gorenjec.spedupfurnaces.models.DisplayPacket;
 import me.gorenjec.spedupfurnaces.storage.SQLStorage;
 import me.gorenjec.spedupfurnaces.utils.NBTUtil;
 import net.milkbowl.vault.economy.Economy;
+import net.minecraft.world.phys.Vec3;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -28,6 +30,7 @@ public final class SpedupFurnaces extends JavaPlugin {
     private CommandHandler commandHandler;
     private SQLStorage storage;
     private InventoryManager manager;
+    private DisplayPacket displayPacket;
     private static Economy econ = null;
     private boolean griefPrevention;
 
@@ -46,6 +49,7 @@ public final class SpedupFurnaces extends JavaPlugin {
         this.furnacesFile = new FurnacesFile(this);
         this.customizationFile = new CustomizationFile(this);
         this.nbtUtil = new NBTUtil(this);
+        this.displayPacket = new DisplayPacket();
         this.commandHandler = new CommandHandler(this);
         this.manager = new InventoryManager(this);
         manager.invoke();
@@ -111,5 +115,9 @@ public final class SpedupFurnaces extends JavaPlugin {
 
     public SQLStorage getStorage() {
         return storage;
+    }
+
+    public DisplayPacket getDisplayPacket() {
+        return displayPacket;
     }
 }
