@@ -64,6 +64,7 @@ public class FurnaceGui {
                                 player.setLevel(player.getLevel() - Integer.parseInt(getNextExpCost()));
                                 SpedupFurnaces.getEcon().withdrawPlayer(player, Integer.parseInt(getNextMoneyCost()));
                                 customFurnace.addLevel(1);
+                                customFurnace.getHoloTextDisplay().setText("§bLevel " + customFurnace.getLevel());
                                 player.sendMessage(HexUtils.colorify(getcConfig().getString("messages.bought-message")));
                                 update(player, contents);
                             } else if (player.getLevel() < Integer.parseInt(getNextExpCost())) {
@@ -196,6 +197,7 @@ public class FurnaceGui {
                         IntelligentItem upgradeInteractiveItem = !Objects.equals(getNextMoneyCost(), "MAX") ? IntelligentItem.of(upgradeItem, event -> {
                             if (player.getLevel() >= Integer.parseInt(getNextExpCost()) && SpedupFurnaces.getEcon().has(player, Integer.parseInt(getNextMoneyCost()))) {
                                 customFurnace.addLevel(1);
+                                customFurnace.getHoloTextDisplay().setText("§bLevel " + customFurnace.getLevel());
                                 player.sendMessage(HexUtils.colorify(getcConfig().getString("messages.bought-message")));
                                 player.setLevel(player.getExpToLevel() - Integer.parseInt(getNextExpCost()));
                                 SpedupFurnaces.getEcon().withdrawPlayer(player, Integer.parseInt(getNextMoneyCost()));

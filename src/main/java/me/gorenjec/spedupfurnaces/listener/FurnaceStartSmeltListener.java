@@ -3,13 +3,20 @@ package me.gorenjec.spedupfurnaces.listener;
 import me.gorenjec.spedupfurnaces.cache.InMemoryCache;
 import me.gorenjec.spedupfurnaces.data.FurnacesFile;
 import me.gorenjec.spedupfurnaces.models.CustomFurnace;
+import me.gorenjec.spedupfurnaces.models.HoloTextDisplay;
+import net.minecraft.world.entity.Display;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Directional;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.FurnaceStartSmeltEvent;
+import org.bukkit.util.Vector;
 
 import java.util.logging.Logger;
 
@@ -28,7 +35,7 @@ public class FurnaceStartSmeltListener implements Listener {
         CustomFurnace customFurnace = cache.getFurnace(block.getLocation());
         if (customFurnace == null) {
             if (cache.getInstance().getConfig().getBoolean("settings.furnaces-worldwide")) {
-                customFurnace = new CustomFurnace(block.getLocation(), block.getType(), 1);
+                customFurnace = cache.getFurnace(block.getLocation(), 1);
                 cache.cacheFurnace(customFurnace);
             } else {
                 return;

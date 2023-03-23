@@ -5,10 +5,15 @@ import me.gorenjec.spedupfurnaces.cache.InMemoryCache;
 import me.gorenjec.spedupfurnaces.data.CustomizationFile;
 import me.gorenjec.spedupfurnaces.data.FurnacesFile;
 import me.gorenjec.spedupfurnaces.models.CustomFurnace;
+import me.gorenjec.spedupfurnaces.models.HoloTextDisplay;
 import me.gorenjec.spedupfurnaces.utils.NBTUtil;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
+import net.minecraft.world.entity.Display;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Directional;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -17,6 +22,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.util.Vector;
 
 import java.util.Objects;
 import java.util.logging.Logger;
@@ -56,9 +62,10 @@ public class PlayerInteractListener implements Listener {
         // Create new furnace if not cached and cache it
         if (customFurnace == null) {
             if (instance.getConfig().getBoolean("settings.furnaces-worldwide")) {
-                customFurnace = new CustomFurnace(loc, block.getType(), 1);
+                customFurnace = cache.getFurnace(loc, 1);
                 cache.cacheFurnace(customFurnace);
                 cache.addGui(customFurnace);
+                cache.addHoloTextDisplay(customFurnace);
             } else {
                 return;
             }

@@ -9,10 +9,7 @@ import me.gorenjec.spedupfurnaces.commands.furnace.ReloadSubCommand;
 import me.gorenjec.spedupfurnaces.commands.furnace.SpedupFurnaceCommand;
 import me.gorenjec.spedupfurnaces.data.CustomizationFile;
 import me.gorenjec.spedupfurnaces.data.FurnacesFile;
-import me.gorenjec.spedupfurnaces.listener.FurnaceStartSmeltListener;
-import me.gorenjec.spedupfurnaces.listener.PlayerBreakListener;
-import me.gorenjec.spedupfurnaces.listener.PlayerInteractListener;
-import me.gorenjec.spedupfurnaces.listener.PlayerPlaceListener;
+import me.gorenjec.spedupfurnaces.listener.*;
 import me.gorenjec.spedupfurnaces.models.DisplayPacket;
 import me.gorenjec.spedupfurnaces.storage.SQLStorage;
 import me.gorenjec.spedupfurnaces.utils.NBTUtil;
@@ -82,6 +79,8 @@ public final class SpedupFurnaces extends JavaPlugin {
         pM.registerEvents(new FurnaceStartSmeltListener(cache, furnacesFile), this);
         pM.registerEvents(new PlayerBreakListener(furnacesFile, cache, nbtUtil), this);
         pM.registerEvents(new PlayerInteractListener(furnacesFile, cache), this);
+        pM.registerEvents(new PlayerJoinListener(cache), this);
+        pM.registerEvents(new PlayerQuitListener(cache), this);
     }
 
     public boolean setupGriefPrevention() {
@@ -115,6 +114,10 @@ public final class SpedupFurnaces extends JavaPlugin {
 
     public SQLStorage getStorage() {
         return storage;
+    }
+
+    public InMemoryCache getCache() {
+        return cache;
     }
 
     public DisplayPacket getDisplayPacket() {

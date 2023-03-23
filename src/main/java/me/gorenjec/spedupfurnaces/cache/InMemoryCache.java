@@ -5,21 +5,25 @@ import me.gorenjec.spedupfurnaces.SpedupFurnaces;
 import me.gorenjec.spedupfurnaces.data.CustomizationFile;
 import me.gorenjec.spedupfurnaces.guis.FurnaceGui;
 import me.gorenjec.spedupfurnaces.models.CustomFurnace;
+import me.gorenjec.spedupfurnaces.models.HoloTextDisplay;
 import me.gorenjec.spedupfurnaces.storage.SQLStorage;
 import me.gorenjec.spedupfurnaces.utils.HexUtils;
 import me.gorenjec.spedupfurnaces.utils.NBTUtil;
+import net.minecraft.world.entity.Display;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Directional;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class InMemoryCache {
     private SpedupFurnaces instance;
@@ -29,6 +33,7 @@ public class InMemoryCache {
     private Map<Location, CustomFurnace> addedFurnaceMap = new HashMap<>();
     private Map<Location, CustomFurnace> removedFurnaceMap = new HashMap<>();
     private Map<CustomFurnace, RyseInventory> furnaceGuiMap = new HashMap<>();
+    private Collection<HoloTextDisplay> holoTextDisplays = new ArrayList<>();
 
     public InMemoryCache(SpedupFurnaces instance, CustomizationFile customizationFile) {
         this.instance = instance;
@@ -77,12 +82,58 @@ public class InMemoryCache {
         furnaceGuiMap.put(customFurnace, new FurnaceGui(instance, customFurnace).getGui());
     }
 
+    public void addHoloTextDisplay(CustomFurnace customFurnace) {
+        holoTextDisplays.add(customFurnace.getHoloTextDisplay());
+    }
+
     public RyseInventory getGui(CustomFurnace customFurnace) {
         return this.furnaceGuiMap.get(customFurnace);
     }
 
     public CustomFurnace getFurnace(Location loc) {
         return furnaceMap.get(loc);
+    }
+
+    public CustomFurnace getFurnace(Location location, int level) {
+        Block block = location.getBlock();
+        BlockData blockData = block.getBlockData();
+        BlockFace blockFace = ((Directional) blockData).getFacing();
+        Vector direction = blockFace.getDirection();
+        float yaw = 0;
+
+        switch (blockFace) {
+            case NORTH -> {
+                yaw = 180;
+                direction.multiply(0.51);
+            }
+            case EAST -> {
+                yaw = -90;
+                direction.multiply(0.5);
+            }
+            case SOUTH -> {
+                yaw = 0;
+                direction.multiply(0.5);
+            }
+            case WEST -> {
+                yaw = 90;
+                direction.multiply(0.51);
+            }
+        }
+
+        location.add(0.5, 0.3, 0.5);
+        location.add(direction);
+
+        CustomFurnace customFurnace = new CustomFurnace(block.getLocation(), block.getType(), level, new HoloTextDisplay(
+                instance,
+                "§bLevel " + level,
+                location,
+                10,
+                yaw,
+                0,
+                Display.BillboardConstraints.FIXED
+        ));
+
+        return customFurnace;
     }
 
     public ItemStack createItem(CustomFurnace customFurnace, int speed, NBTUtil nbtUtil) {
@@ -120,6 +171,7 @@ public class InMemoryCache {
 
     public void removeFurnace(Location location) {
         furnaceGuiMap.remove(furnaceMap.get(location));
+        holoTextDisplays.remove(furnaceMap.get(location).getHoloTextDisplay());
         updatedFurnaceMap.remove(location);
         removedFurnaceMap.put(location, furnaceMap.get(location));
         addedFurnaceMap.remove(location);
@@ -152,6 +204,10 @@ public class InMemoryCache {
         item.setItemMeta(itemMeta);
 
         return item;
+    }
+
+    public Collection<HoloTextDisplay> getHoloTextDisplays() {
+        return holoTextDisplays;
     }
 
     public SpedupFurnaces getInstance() {

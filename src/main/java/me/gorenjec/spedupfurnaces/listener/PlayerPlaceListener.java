@@ -3,6 +3,7 @@ package me.gorenjec.spedupfurnaces.listener;
 import me.gorenjec.spedupfurnaces.cache.InMemoryCache;
 import me.gorenjec.spedupfurnaces.data.FurnacesFile;
 import me.gorenjec.spedupfurnaces.models.CustomFurnace;
+import me.gorenjec.spedupfurnaces.models.HoloTextDisplay;
 import me.gorenjec.spedupfurnaces.utils.NBTUtil;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import net.minecraft.world.entity.Display;
@@ -67,20 +68,17 @@ public class PlayerPlaceListener implements Listener {
         }
 
         // Create and cache a custom furnace object
-        CustomFurnace customFurnace = new CustomFurnace(block.getLocation(), block.getType(), level);
+        CustomFurnace customFurnace = getFurnace(block.getLocation(), level);
         cache.cacheFurnace(customFurnace);
         cache.addGui(customFurnace);
-
-        spawnEntity(customFurnace, e.getPlayer());
+        cache.addHoloTextDisplay(customFurnace);
     }
 
-    public void spawnEntity(CustomFurnace customFurnace, Player player) {
-        Block block = customFurnace.getLocation().getBlock();
-        Location location = block.getLocation().clone();
+    public CustomFurnace getFurnace(Location location, int level) {
+        Block block = location.getBlock();
         BlockData blockData = block.getBlockData();
         BlockFace blockFace = ((Directional) blockData).getFacing();
         Vector direction = blockFace.getDirection();
-        int level = customFurnace.getLevel();
         float yaw = 0;
 
         switch (blockFace) {
@@ -105,16 +103,16 @@ public class PlayerPlaceListener implements Listener {
         location.add(0.5, 0.3, 0.5);
         location.add(direction);
 
-        cache.getInstance().getDisplayPacket().spawnTextEntity(
-                player,
-                100,
-                UUID.randomUUID(),
-                location,
+        CustomFurnace customFurnace = new CustomFurnace(block.getLocation(), block.getType(), level, new HoloTextDisplay(
+                cache.getInstance(),
                 "§bLevel " + level,
-                1.0f,
+                location,
+                10,
                 yaw,
                 0,
                 Display.BillboardConstraints.FIXED
-        );
+        ));
+
+        return customFurnace;
     }
 }

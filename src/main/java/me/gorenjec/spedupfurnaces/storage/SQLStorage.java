@@ -4,18 +4,21 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import me.gorenjec.spedupfurnaces.SpedupFurnaces;
 import me.gorenjec.spedupfurnaces.models.CustomFurnace;
+import me.gorenjec.spedupfurnaces.models.HoloTextDisplay;
+import net.minecraft.world.entity.Display;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.util.Vector;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class SQLStorage {
     private HikariDataSource dataSource;
@@ -68,16 +71,64 @@ public class SQLStorage {
                     + "loc_x INT, "
                     + "loc_y INT, "
                     + "loc_z INT, "
+                    + "loc_facing TEXT, "
                     + "loc_world TEXT"
                     + ")";
             PreparedStatement statement = connection.prepareStatement(createTableSql);
             statement.execute();
 
-            instance.getLogger().info("Verified data tables.");
+            // Check if all columns exist in the table
+            Set<String> existingColumns = getTableColumns(connection, PLAYERDATA_TABLE);
+            Set<String> requiredColumns = Set.of("id", "type", "level", "loc_x", "loc_y", "loc_z", "loc_facing", "loc_world");
+            if (!existingColumns.containsAll(requiredColumns)) {
+                // Create a new table with all the required columns
+                String newTableSql = "CREATE TABLE " + PLAYERDATA_TABLE + "_new("
+                        + "id INTEGER PRIMARY KEY " + autoInc + ","
+                        + "type TEXT, "
+                        + "level INT, "
+                        + "loc_x INT, "
+                        + "loc_y INT, "
+                        + "loc_z INT, "
+                        + "loc_facing TEXT DEFAULT NULL, "
+                        + "loc_world TEXT"
+                        + ")";
+                statement = connection.prepareStatement(newTableSql);
+                statement.execute();
+
+                // Copy the data from the old table to the new table
+                String copyDataSql = "INSERT INTO " + PLAYERDATA_TABLE + "_new "
+                        + "SELECT * FROM " + PLAYERDATA_TABLE;
+                statement = connection.prepareStatement(copyDataSql);
+                statement.execute();
+
+                // Drop the old table and rename the new table
+                String dropOldTableSql = "DROP TABLE " + PLAYERDATA_TABLE;
+                statement = connection.prepareStatement(dropOldTableSql);
+                statement.execute();
+
+                String renameNewTableSql = "ALTER TABLE " + PLAYERDATA_TABLE + "_new "
+                        + "RENAME TO " + PLAYERDATA_TABLE;
+                statement = connection.prepareStatement(renameNewTableSql);
+                statement.execute();
+
+                instance.getLogger().info("Created new data table for " + PLAYERDATA_TABLE);
+            } else {
+                instance.getLogger().info("Verified data table for " + PLAYERDATA_TABLE);
+            }
         } catch (SQLException e) {
-            instance.getLogger().severe("Could not create tables!");
+            instance.getLogger().severe("Could not create or update tables!");
             e.printStackTrace();
         }
+    }
+
+    private Set<String> getTableColumns(Connection connection, String tableName) throws SQLException {
+        Set<String> columns = new HashSet<>();
+        DatabaseMetaData metadata = connection.getMetaData();
+        ResultSet resultSet = metadata.getColumns(null, null, tableName, null);
+        while (resultSet.next()) {
+            columns.add(resultSet.getString("COLUMN_NAME"));
+        }
+        return columns;
     }
 
     /*
@@ -92,7 +143,7 @@ public class SQLStorage {
 
     public void addFurnace(CustomFurnace customFurnace) {
         boolean mysql = instance.getConfig().getBoolean("data_storage.use_mysql");
-        String sql = mysql ? "INSERT INTO " + PLAYERDATA_TABLE + " (type, level, loc_x, loc_y, loc_z, loc_world) VALUES (?, ?, ?, ?, ?, ?)" : "INSERT INTO " + PLAYERDATA_TABLE + " VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = mysql ? "INSERT INTO " + PLAYERDATA_TABLE + " (type, level, loc_x, loc_y, loc_z, loc_facing, loc_world) VALUES (?, ?, ?, ?, ?, ?, ?)" : "INSERT INTO " + PLAYERDATA_TABLE + " VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(sql);
@@ -103,14 +154,16 @@ public class SQLStorage {
                 statement.setInt(3, customFurnace.getLocation().getBlockX());
                 statement.setInt(4, customFurnace.getLocation().getBlockY());
                 statement.setInt(5, customFurnace.getLocation().getBlockZ());
-                statement.setString(6, customFurnace.getLocation().getWorld().getName());
+                statement.setString(6, customFurnace.getFacing().name());
+                statement.setString(7, customFurnace.getLocation().getWorld().getName());
             } else {
                 statement.setString(2, customFurnace.getMaterial().name());
                 statement.setInt(3, customFurnace.getLevel());
                 statement.setInt(4, customFurnace.getLocation().getBlockX());
                 statement.setInt(5, customFurnace.getLocation().getBlockY());
                 statement.setInt(6, customFurnace.getLocation().getBlockZ());
-                statement.setString(7, customFurnace.getLocation().getWorld().getName());
+                statement.setString(7, customFurnace.getFacing().name());
+                statement.setString(8, customFurnace.getLocation().getWorld().getName());
             }
 
             statement.execute();
@@ -121,7 +174,7 @@ public class SQLStorage {
     }
 
     public void updateFurnace(CustomFurnace customFurnace) {
-        String sql = "UPDATE " + PLAYERDATA_TABLE + " SET level = ? WHERE loc_x = ? AND loc_y = ? AND loc_z = ? AND loc_world = ?;";
+        String sql = "UPDATE " + PLAYERDATA_TABLE + " SET level = ? WHERE loc_x = ? AND loc_y = ? AND loc_z = ? AND loc_facing = ? AND loc_world = ?;";
 
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(sql);
@@ -130,7 +183,8 @@ public class SQLStorage {
             statement.setInt(2, location.getBlockX());
             statement.setInt(3, location.getBlockY());
             statement.setInt(4, location.getBlockZ());
-            statement.setString(5, location.getWorld().getName());
+            statement.setString(5, customFurnace.getFacing().name());
+            statement.setString(6, location.getWorld().getName());
 
             statement.execute();
         } catch (SQLException e) {
@@ -169,13 +223,14 @@ public class SQLStorage {
                 int x = playerDataSet.getInt("loc_x");
                 int y = playerDataSet.getInt("loc_y");
                 int z = playerDataSet.getInt("loc_z");
+                BlockFace blockFace = BlockFace.valueOf(playerDataSet.getString("loc_facing"));
                 String worldName = playerDataSet.getString("loc_world");
                 World world = Bukkit.getWorld(worldName);
                 Location location = new Location(world, x, y, z);
                 String type = playerDataSet.getString("type");
                 int level = playerDataSet.getInt("level");
                 Material material = Material.valueOf(type.toUpperCase());
-                CustomFurnace customFurnace = new CustomFurnace(location, material, level);
+                CustomFurnace customFurnace = getFurnace(location, level, material, blockFace);
 
                 customFurnaceMap.put(
                         location, customFurnace
@@ -186,6 +241,44 @@ public class SQLStorage {
         }
 
         return customFurnaceMap;
+    }
+    public CustomFurnace getFurnace(Location location, int level, Material type, BlockFace blockFace) {
+        Vector direction = blockFace.getDirection();
+        float yaw = 0;
+
+        switch (blockFace) {
+            case NORTH -> {
+                yaw = 180;
+                direction.multiply(0.51);
+            }
+            case EAST -> {
+                yaw = -90;
+                direction.multiply(0.5);
+            }
+            case SOUTH -> {
+                yaw = 0;
+                direction.multiply(0.5);
+            }
+            case WEST -> {
+                yaw = 90;
+                direction.multiply(0.51);
+            }
+        }
+
+        location.add(0.5, 0.3, 0.5);
+        location.add(direction);
+
+        CustomFurnace customFurnace = new CustomFurnace(location, type, level, new HoloTextDisplay(
+                instance,
+                "§bLevel " + level,
+                location,
+                10,
+                yaw,
+                0,
+                Display.BillboardConstraints.FIXED
+        ));
+
+        return customFurnace;
     }
 
     public void clearFurnaces() {
